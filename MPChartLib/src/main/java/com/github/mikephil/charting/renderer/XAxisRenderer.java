@@ -84,7 +84,7 @@ public class XAxisRenderer extends AxisRenderer {
         final FSize labelSize = Utils.calcTextSize(mAxisLabelPaint, longest);
 
         final float labelWidth = labelSize.width;
-        final float labelHeight = Utils.calcTextHeight(mAxisLabelPaint, "Q");
+        final float labelHeight = Utils.calcTextHeight(mAxisLabelPaint, "Q") * 2;
 
         final FSize labelRotatedSize = Utils.getSizeOfRotatedRectangleByDegrees(
                 labelWidth,
@@ -203,12 +203,14 @@ public class XAxisRenderer extends AxisRenderer {
             if (mViewPortHandler.isInBoundsX(x)) {
 
                 String label = mXAxis.getValueFormatter().getFormattedValue(mXAxis.mEntries[i / 2], mXAxis);
+                String[] labelParts = label.split("\n");
+                String labelFirst = labelParts[0];
 
                 if (mXAxis.isAvoidFirstLastClippingEnabled()) {
 
                     // avoid clipping of the last
                     if (i == mXAxis.mEntryCount - 1 && mXAxis.mEntryCount > 1) {
-                        float width = Utils.calcTextWidth(mAxisLabelPaint, label);
+                        float width = Utils.calcTextWidth(mAxisLabelPaint, labelFirst);
 
                         if (width > mViewPortHandler.offsetRight() * 2
                                 && x + width > mViewPortHandler.getChartWidth())
@@ -217,12 +219,38 @@ public class XAxisRenderer extends AxisRenderer {
                         // avoid clipping of the first
                     } else if (i == 0) {
 
-                        float width = Utils.calcTextWidth(mAxisLabelPaint, label);
+                        float width = Utils.calcTextWidth(mAxisLabelPaint, labelFirst);
                         x += width / 2;
                     }
                 }
 
-                drawLabel(c, label, x, pos, anchor, labelRotationAngleDegrees);
+                drawLabel(c, labelFirst, x, pos, anchor, labelRotationAngleDegrees);
+
+                if (labelParts.length > 1) {
+
+                    String labelSecond = labelParts[1];
+                    float yoffset = Utils.calcTextHeight(mAxisLabelPaint, labelFirst) + 10;
+
+                    if (mXAxis.isAvoidFirstLastClippingEnabled()) {
+
+                        // avoid clipping of the last
+                        if (i == mXAxis.mEntryCount - 1 && mXAxis.mEntryCount > 1) {
+                            float width = Utils.calcTextWidth(mAxisLabelPaint, labelSecond);
+
+                            if (width > mViewPortHandler.offsetRight() * 2
+                                    && x + width > mViewPortHandler.getChartWidth())
+                                x -= width / 2;
+
+                            // avoid clipping of the first
+                        } else if (i == 0) {
+
+                            float width = Utils.calcTextWidth(mAxisLabelPaint, labelSecond);
+                            x += width / 2;
+                        }
+                    }
+
+                    drawLabel(c, labelSecond, x, pos + yoffset, anchor, labelRotationAngleDegrees);
+                }
             }
         }
     }
